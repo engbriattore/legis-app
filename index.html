@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Legis - Política no Brasil</title>
+  <style>
+    :root {
+      --bg-color: #F2F2F7;
+      --card-bg: rgba(255, 255, 255, 0.8);
+      --text-primary: #000000;
+      --text-secondary: #8E8E93;
+      --accent-color: #007AFF;
+      --border-color: rgba(60, 60, 67, 0.12);
+      --radius: 20px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #000000;
+        --card-bg: rgba(28, 28, 30, 0.8);
+        --text-primary: #FFFFFF;
+        --text-secondary: #8E8E93;
+        --border-color: rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      padding: 20px 16px;
+      position: relative;
+    }
+
+    /* iOS Large Title Header */
+    header {
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: -0.08px;
+    }
+
+    .title {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 0.37px;
+      margin-top: 2px;
+    }
+
+    /* Apple Search Bar */
+    .search-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px 10px 36px;
+      background: rgba(118, 118, 128, 0.12);
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    /* Candidate Card (Glassmorphism) */
+    .candidate-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .candidate-card:active {
+      transform: scale(0.98);
+      opacity: 0.8;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .info {
+      flex-grow: 1;
+    }
+
+    .candidate-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .candidate-role {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(0, 122, 255, 0.12);
+      color: var(--accent-color);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .chevron {
+      color: var(--text-secondary);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* Apple Bottom Sheet Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 100;
+    }
+
+    .modal-sheet {
+      background: var(--bg-color);
+      width: 100%;
+      max-width: 430px;
+      max-height: 90vh;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 20px;
+      overflow-y: auto;
+      animation: slideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      position: relative;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(118, 118, 128, 0.2);
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sheet-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .sheet-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 20px 0 10px;
+    }
+
+    .detail-box {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 15px;
+      line-height: 1.4;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Custom Chart Bars */
+    .chart-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      height: 120px;
+      padding-top: 20px;
+    }
+
+    .chart-bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .chart-bar {
+      width: 100%;
+      background: linear-gradient(180deg, #007AFF 0%, #0056B3 100%);
+      border-radius: 6px 6px 0 0;
+      transition: height 0.5s ease;
+    }
+
+    .chart-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <div class="subtitle">Eleições Brasil</div>
+      <div class="title">Candidatos</div>
+    </header>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome, partido ou cargo..." onkeyup="filterCandidates()">
+    </div>
+
+    <div id="candidatesList"></div>
+  </div>
+
+  <!-- iOS Sheet Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const candidates = [
+      {
+        id: 1,
+        name: "Ana Silva Santos",
+        ballotName: "Ana Silva",
+        party: "PDS",
+        number: 99,
+        role: "Presidente",
+        color: "#007AFF",
+        bio: "Advogada e economista com 15 anos de atuação pública em gestão e políticas sociais.",
+        assets: "R$ 1.250.000,00",
+        history: [
+          { year: '2018', height: '35%' },
+          { year: '2022', height: '65%' },
+          { year: '2026', height: '100%' }
+        ],
+        proposal: "Foco em digitalização do SUS, investimento massivo em escolas de tempo integral e incentivos fiscais para inovação tecnológica."
+      },
+      {
+        id: 2,
+        name: "Carlos Eduardo Oliveira",
+        ballotName: "Carlos Oliveira",
+        party: "PRT",
+        number: 88,
+        role: "Presidente",
+        color: "#FF9500",
+        bio: "Professor universitário e pesquisador na área de desenvolvimento sustentável e economia verde.",
+        assets: "R$ 890.000,00",
+        history: [
+          { year: '2018', height: '25%' },
+          { year: '2022', height: '50%' },
+          { year: '2026', height: '75%' }
+        ],
+        proposal: "Transição para matriz energética limpa, ampliação da telemedicina e modernização da infraestrutura escolar rural."
+      },
+      {
+        id: 3,
+        name: "Mariana Costa Ramos",
+        ballotName: "Mariana Costa",
+        party: "PLI",
+        number: 12,
+        role: "Governadora",
+        color: "#34C759",
+        bio: "Engenheira civil com vasta experiência em infraestrutura urbana e transporte público.",
+        assets: "R$ 2.100.000,00",
+        history: [
+          { year: '2018', height: '50%' },
+          { year: '2022', height: '80%' },
+          { year: '2026', height: '100%' }
+        ],
+        proposal: "Expansão da malha metroviária, implementação de passe livre para estudantes e fortalecimento do policiamento comunitário."
+      }
+    ];
+
+    function renderList(data) {
+      const listEl = document.getElementById('candidatesList');
+      listEl.innerHTML = '';
+
+      data.forEach(c => {
+        listEl.innerHTML += `
+          <div class="candidate-card" onclick="openModal(${c.id})">
+            <div class="avatar" style="background: ${c.color}">${c.ballotName.charAt(0)}</div>
+            <div class="info">
+              <div class="candidate-name">${c.ballotName}</div>
+              <div class="candidate-role">${c.party} • ${c.role}</div>
+              <span class="badge">Nº ${c.number}</span>
+            </div>
+            <div class="chevron">›</div>
+          </div>
+        `;
+      });
+    }
+
+    function filterCandidates() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = candidates.filter(c => 
+        c.ballotName.toLowerCase().includes(query) ||
+        c.party.toLowerCase().includes(query) ||
+        c.role.toLowerCase().includes(query)
+      );
+      renderList(filtered);
+    }
+
+    function openModal(id) {
+      const candidate = candidates.find(c => c.id === id);
+      const modalContent = document.getElementById('modalContent');
+
+      modalContent.innerHTML = `
+        <div class="sheet-header">
+          <div class="sheet-avatar" style="background: ${candidate.color}">${candidate.ballotName.charAt(0)}</div>
+          <h2 style="font-size: 22px; font-weight: 700;">${candidate.ballotName}</h2>
+          <div style="color: var(--text-secondary); font-size: 14px;">${candidate.name}</div>
+          <div style="margin-top: 8px;"><span class="badge">${candidate.party} • Nº ${candidate.number}</span></div>
+        </div>
+
+        <div class="section-title">Trajetória</div>
+        <div class="detail-box">${candidate.bio}</div>
+
+        <div class="section-title">Declaração de Bens (${candidate.assets})</div>
+        <div class="detail-box">
+          <div class="chart-container">
+            ${candidate.history.map(h => `
+              <div class="chart-bar-group">
+                <div class="chart-bar" style="height: ${h.height}; background:${candidate.color}"></div>
+                <div class="chart-label">${h.year}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="section-title">Principais Propostas</div>
+        <div class="detail-box">${candidate.proposal}</div>
+      `;
+
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function closeModal(e) {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    // Inicializar lista
+    renderList(candidates);
+  </script>
+</body>
+</html>
